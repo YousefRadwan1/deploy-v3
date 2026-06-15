@@ -1,0 +1,31 @@
+# Environment variables - لا ترفعهم أبدًا على GitHub
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# الـ Vector Database - هتتحمل من Drive على Azure
+firecrawl_rag_db/
+
+# Scraped markdown files
+scraped_markdown/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
