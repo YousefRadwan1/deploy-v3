@@ -2,7 +2,9 @@ fastapi
 uvicorn
 python-dotenv
 pydantic
-
+gunicorn==22.0.0
+python-multipart==0.0.9
+requests>=2.31.0
 langchain
 langchain-core
 langchain-community
