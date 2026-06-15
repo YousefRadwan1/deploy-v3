@@ -1,3 +1,7 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import os
 import uvicorn
 from contextlib import asynccontextmanager
@@ -5,12 +9,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
-
-# ============================================
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-# ============================================
 
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_chroma import Chroma
