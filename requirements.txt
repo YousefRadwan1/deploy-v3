@@ -20,3 +20,4 @@ firecrawl-py
 tqdm
 
 python-multipart
+pysqlite3-binary
