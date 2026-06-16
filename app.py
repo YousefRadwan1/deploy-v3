@@ -58,8 +58,12 @@ URLS = [
 ]
 
 def scrape_and_build_db(persist_dir: str):
+    FIRECRAWL_API_KEY="fc-ea5e9d5bb7fa49e1a5839f1974425862"
+    GROQ_API_KEY="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"
+    HUGGINGFACEHUB_API_TOKEN="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"
     print("🚀 DB not found. Starting Firecrawl scraping...")
     firecrawl = Firecrawl(api_key=FIRECRAWL_API_KEY)
+    
     documents = []
     for url in URLS:
         try:
