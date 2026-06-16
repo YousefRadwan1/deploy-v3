@@ -17,7 +17,9 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.messages import HumanMessage, AIMessage
-
+from firecrawl import Firecrawl
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 load_dotenv()
 
 # ====================== CONFIG ======================
@@ -39,24 +41,80 @@ LLM_MODEL = "llama-3.3-70b-versatile"
 vectorstore = None
 chat_history = []
 
+URLS = [
+    "https://www.unicef.org/parenting/child-development/your-babys-developmental-milestones-2-months",
+    "https://www.unicef.org/parenting/child-development/your-babys-developmental-milestones-4-months",
+    "https://www.unicef.org/parenting/child-development/your-babys-developmental-milestones-6-months",
+    "https://www.unicef.org/parenting/child-development/your-babys-developmental-milestones-9-months",
+    "https://www.unicef.org/parenting/child-development/your-toddlers-developmental-milestones-1-year",
+    "https://www.unicef.org/parenting/child-development/your-toddlers-developmental-milestones-18-months",
+    "https://www.unicef.org/parenting/child-development/your-toddlers-developmental-milestones-2-years",
+    "https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding",
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/tastes-and-textures.html",
+    "https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/foods-and-drinks-to-encourage.html",
+    "https://www.nhs.uk/baby/weaning-and-feeding/what-to-feed-young-children/",
+    "https://www.moh.gov.sa/en/healthawareness/educationalcontent/babyhealth/pages/complementary-food-for-infants.aspx",
+    "https://caringforkids.cps.ca/handouts/healthy-living/feeding_your_baby_in_the_first_year",
+]
+
+def scrape_and_build_db(persist_dir: str):
+    print("🚀 DB not found. Starting Firecrawl scraping...")
+    firecrawl = Firecrawl(api_key=FIRECRAWL_API_KEY)
+    documents = []
+    for url in URLS:
+        try:
+            print(f"🔍 Scraping: {url}")
+            result = firecrawl.scrape(url, formats=["markdown"], only_main_content=True, timeout=30000)
+            content = result.markdown or ""
+            if content.strip():
+                documents.append(Document(page_content=content, metadata={"source": url}))
+                print(f"✅ Done: {url}")
+            else:
+                print(f"⚠️ Empty: {url}")
+        except Exception as e:
+            print(f"❌ Failed {url}: {e}")
+
+    if not documents:
+        print("❌ No documents scraped.")
+        return None
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000, chunk_overlap=200,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+    splits = text_splitter.split_documents(documents)
+    embeddings = HuggingFaceEndpointEmbeddings(
+        model=EMBEDDING_MODEL,
+        huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
+    )
+    vs = Chroma.from_documents(
+        documents=splits, embedding=embeddings,
+        persist_directory=persist_dir,
+        collection_name="firecrawl_scrape_hf"
+    )
+    print("✅ Vector store built!")
+    return vs
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global vectorstore
     persist_dir = os.path.abspath(PERSIST_DIRECTORY)
-    if not os.path.exists(persist_dir):
-        print(f"❌ Error: Database not found at {persist_dir}.")
-    else:
+    db_exists = os.path.exists(os.path.join(persist_dir, "chroma.sqlite3"))
+    embeddings = HuggingFaceEndpointEmbeddings(
+        model=EMBEDDING_MODEL,
+        huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
+    )
+    if db_exists:
         print("🔄 Loading existing Chroma database...")
-        embeddings = HuggingFaceEndpointEmbeddings(
-            model=EMBEDDING_MODEL,
-            huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
-        )
         vectorstore = Chroma(
             persist_directory=persist_dir,
             embedding_function=embeddings,
             collection_name="firecrawl_scrape_hf"
         )
-        print("✅ Database loaded successfully and ready for conversational queries.")
+        print("✅ Database loaded!")
+    else:
+        print("⚠️ DB not found. Building via Firecrawl...")
+        vectorstore = scrape_and_build_db(persist_dir)
     yield
     print("🛑 Shutting down...")
 
