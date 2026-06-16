@@ -29,7 +29,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 # PERSIST_DIRECTORY env var تتحكم فيها من Azure App Settings
 PERSIST_DIRECTORY = os.getenv(
     "PERSIST_DIRECTORY",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "firecrawl_rag_db")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "db")
 )
 
 EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
