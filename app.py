@@ -69,6 +69,40 @@ class ChatResponse(BaseModel):
     answer: str
 
 
+@app.get("/health")
+async def health_check():
+    """
+    استخدمها عشان تتأكد إن كل حاجة شغالة بدون ما تقرأ الـ logs:
+    GET https://YOUR_APP.azurewebsites.net/health
+    """
+    import sqlite3 as _sqlite3
+
+    persist_dir = os.path.abspath(PERSIST_DIRECTORY)
+    db_file_exists = os.path.exists(os.path.join(persist_dir, "chroma.sqlite3"))
+
+    status = {
+        "app_status": "ok",
+        "sqlite3_version": _sqlite3.sqlite_version,
+        "persist_directory": persist_dir,
+        "db_folder_exists": os.path.exists(persist_dir),
+        "db_file_exists": db_file_exists,
+        "vectorstore_loaded": vectorstore is not None,
+        "huggingface_token_set": bool(HUGGINGFACEHUB_API_TOKEN),
+        "groq_key_set": bool(GROQ_API_KEY),
+    }
+
+    # اختبار فعلي للـ retrieval لو الـ vectorstore متحمّل
+    if vectorstore is not None:
+        try:
+            test_results = vectorstore.similarity_search("test", k=1)
+            status["retrieval_test"] = "ok"
+            status["documents_found"] = len(test_results) > 0
+        except Exception as e:
+            status["retrieval_test"] = f"failed: {str(e)}"
+
+    return status
+
+
 def get_conversational_rag_answer(question: str) -> str:
     global chat_history
     if vectorstore is None:
@@ -277,4 +311,3 @@ async def get_ui():
     </html>
     """
     return HTMLResponse(content=html_content, status_code=200)
-    
