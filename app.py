@@ -23,9 +23,9 @@ from langchain_core.documents import Document
 load_dotenv()
 
 # ====================== CONFIG ======================
-FIRECRAWL_API_KEY="fc-ea5e9d5bb7fa49e1a5839f1974425862"
-GROQ_API_KEY="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"
-HUGGINGFACEHUB_API_TOKEN="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"
+FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 # على Azure: app في /home/site/wwwroot  والـ DB في /home/site/firecrawl_rag_db
 # محلياً:   app في code/               والـ DB في ../firecrawl_rag_db
 # PERSIST_DIRECTORY env var تتحكم فيها من Azure App Settings
@@ -33,11 +33,9 @@ PERSIST_DIRECTORY = os.getenv(
     "PERSIST_DIRECTORY",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "db")
 )
-
-EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
-LLM_MODEL = "llama-3.3-70b-versatile"
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2")
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 # ===================================================
-
 vectorstore = None
 chat_history = []
 
