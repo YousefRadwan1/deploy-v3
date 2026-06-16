@@ -277,5 +277,4 @@ async def get_ui():
     </html>
     """
     return HTMLResponse(content=html_content, status_code=200)
-
-uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    
