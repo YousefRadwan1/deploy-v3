@@ -23,9 +23,9 @@ from langchain_core.documents import Document
 load_dotenv()
 
 # ====================== CONFIG ======================
-HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
+FIRECRAWL_API_KEY="fc-ea5e9d5bb7fa49e1a5839f1974425862"
+GROQ_API_KEY="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"
+HUGGINGFACEHUB_API_TOKEN="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"
 # على Azure: app في /home/site/wwwroot  والـ DB في /home/site/firecrawl_rag_db
 # محلياً:   app في code/               والـ DB في ../firecrawl_rag_db
 # PERSIST_DIRECTORY env var تتحكم فيها من Azure App Settings
@@ -58,9 +58,7 @@ URLS = [
 ]
 
 def scrape_and_build_db(persist_dir: str):
-    FIRECRAWL_API_KEY="fc-ea5e9d5bb7fa49e1a5839f1974425862"
-    GROQ_API_KEY="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"
-    HUGGINGFACEHUB_API_TOKEN="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"
+    
     print("🚀 DB not found. Starting Firecrawl scraping...")
     firecrawl = Firecrawl(api_key=FIRECRAWL_API_KEY)
     
