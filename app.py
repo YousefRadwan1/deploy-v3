@@ -25,7 +25,7 @@ load_dotenv()
 # ====================== CONFIG ======================
 FIRECRAWL_API_KEY="fc-ea5e9d5bb7fa49e1a5839f1974425862"
 GROQ_API_KEY="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"
-HUGGINGFACEHUB_API_TOKEN="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"
+HUGGINGFACEHUB_API_TOKEN="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"
 # على Azure: app في /home/site/wwwroot  والـ DB في /home/site/firecrawl_rag_db
 # محلياً:   app في code/               والـ DB في ../firecrawl_rag_db
 # PERSIST_DIRECTORY env var تتحكم فيها من Azure App Settings
